@@ -1,5 +1,6 @@
 import bcrypt from 'bcrypt';
 import express, { Application, Request, Response } from 'express';
+import { CustomRequest } from './models/custom-request';
 import { LoginRequest } from './models/login.req';
 import { User } from './models/user';
 
@@ -14,7 +15,13 @@ app.get('/users', (req: Request, res: Response<User[]>) => {
   res.send(users);
 });
 
-app.post('/users', async (req: Request<User>, res: Response) => {
+app.post('/users', async (req: CustomRequest<User>, res: Response) => {
+  const user = users.find((user) => user.name === req.body.name);
+
+  if (user) {
+    return res.status(400).send('User already exists');
+  }
+
   try {
     const hashedPassword = await bcrypt.hash(req.body.password, 10);
     const user: User = {
@@ -28,22 +35,25 @@ app.post('/users', async (req: Request<User>, res: Response) => {
   }
 });
 
-app.post('/users/login', async (req: Request<LoginRequest>, res: Response) => {
-  const user = users.find((user) => user.name === req.body.username);
+app.post(
+  '/users/login',
+  async (req: CustomRequest<LoginRequest>, res: Response) => {
+    const user = users.find((user) => user.name === req.body.username);
 
-  if (!user) {
-    return res.status(400).send('User not found');
-  }
-
-  try {
-    if (await bcrypt.compare(req.body.password, user.password)) {
-      res.send('Success');
-    } else {
-      res.send('Not allowed');
+    if (!user) {
+      return res.status(400).send('User not found');
     }
-  } catch {
-    res.status(500).send();
+
+    try {
+      if (await bcrypt.compare(req.body.password, user.password)) {
+        res.send('Success');
+      } else {
+        res.send('Not allowed');
+      }
+    } catch {
+      res.status(500).send();
+    }
   }
-});
+);
 
 app.listen(PORT, () => console.log('Server running'));
