@@ -21,7 +21,8 @@
   "homepage": "https://github.com/ward3d/express-ts#readme",
   "dependencies": {
     "bcrypt": "^5.0.0",
-    "express": "^4.17.1"
+    "express": "^4.17.1",
+    "guid-typescript": "^1.0.9"
   },
   "devDependencies": {
     "@types/bcrypt": "^3.0.0",
